@@ -1,0 +1,20 @@
+simple_sitemap_extensions.settings_sitemap_index:
+  path: '/admin/config/search/simplesitemap/sitemap-index'
+  defaults:
+    _form: '\Drupal\simple_sitemap_extensions\Form\SitemapIndexForm'
+    _title: 'Sitemap Index Settings'
+  requirements:
+    _permission: 'administer sitemap settings'
+
+
+# The actual path to a variant is '/{variant}/sitemap.xml'. Because Drupal 8
+# cannot handle a parameter as first route argument,
+# Drupal\simple_sitemap\PathProcessor\PathProcessorSitemapVariant::processInbound()
+# is being used to catch the request and redirect to the following route.
+simple_sitemap_extensions.sitemap_variant_page:
+  path: '/sitemaps/{variant}/{page}/sitemap.xml'
+  defaults:
+    _controller: '\Drupal\simple_sitemap\Controller\SimplesitemapController::getSitemap'
+    _disable_route_normalizer: 'TRUE'
+  requirements:
+    _access: 'TRUE'

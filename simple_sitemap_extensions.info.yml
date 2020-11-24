@@ -1,0 +1,6 @@
+type: module
+name: Simple XML Sitemap Extensions
+description: 'Extensions for the Simple XML Sitemap module.'
+package: SEO
+core: 8.x
+dependencies: {}
