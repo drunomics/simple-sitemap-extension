@@ -1,0 +1,9 @@
+{
+  "name": "drunomics/simple_sitemap_extensions",
+  "type": "drupal-module",
+  "description": "Extensions for the simple_sitemap drupal module.",
+  "license": "GPL-2.0+",
+  "require": {
+    "drupal/simple_sitemap": "^3.0"
+  }
+}
