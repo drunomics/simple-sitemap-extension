@@ -21,11 +21,4 @@ class MonthlySitemapGenerator extends AbstractDynamicSitemapGenerator {
 
   const DYNAMIC_GENERATOR_PARAMETER_NAME = 'month';
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getDynamicParameterName() {
-    return self::DYNAMIC_GENERATOR_PARAMETER_NAME;
-  }
-
 }

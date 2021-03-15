@@ -124,45 +124,56 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
       $parameters = [];
     }
     else {
-      $dynamic_parameter = $this->getCurrentChunkFromMapping($delta);
-      $parameter = $dynamic_parameter ? $this->getDynamicParameterName() : 'page';
-      $parameters = [$parameter => $dynamic_parameter ?? $delta];
+      $parameters = ['page' => $delta];
+      $dynamic_parameter = $this->getCurrentChunkParameterFromMapping($delta);
+      $parameters[static::DYNAMIC_GENERATOR_PARAMETER_NAME] = $dynamic_parameter ?? $delta;
     }
-    $url = Url::fromRoute(
-      'simple_sitemap.sitemap_variant',
-      $parameters + ['variant' => $this->sitemapVariant],
-      $this->getSitemapUrlSettings()
-    );
+    // @TODO selecting dynamic variant as default might cause additional problems
+    // with the url.
+    $url = $this->isDefaultVariant()
+      ? Url::fromRoute(
+        'simple_sitemap.sitemap_default',
+        $parameters,
+        $this->getSitemapUrlSettings())
+      : Url::fromRoute(
+        'simple_sitemap.sitemap_variant',
+        $parameters + ['variant' => $this->sitemapVariant],
+        $this->getSitemapUrlSettings()
+      );
 
     return $url->toString();
   }
 
   /**
-   * Get current query parameter from the mapping.
-   *
-   * @param int $delta
-   *   Current chunk.
-   *
-   * @return false|string
-   *   Url query parameter or False.
+   * {@inheritdoc}
    */
-  protected function getCurrentChunkFromMapping(int $delta) {
+  public function getCurrentChunkParameterFromMapping(int $delta) {
     if (empty($this->dynamicDeltaMapping)) {
-      $this->dynamicDeltaMapping = $this->state->get(self::DYNAMIC_GENERATOR_ID . '_' . $this->sitemapVariant, FALSE);
+      $this->dynamicDeltaMapping = $this->state->get(static::DYNAMIC_GENERATOR_ID . '_' . $this->sitemapVariant, FALSE);
     }
-    return $this->dynamicDeltaMapping[$delta - self::FIRST_CHUNK_DELTA] ?? FALSE;
+    return $this->dynamicDeltaMapping[$delta - static::FIRST_CHUNK_DELTA] ?? FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getDynamicChunks($results, $variant, $dynamic_parameter_name, $max_links = NULL) {
+  public function getCurrentDeltaFromMapping(string $param) {
+    if (empty($this->dynamicDeltaMapping)) {
+      $this->dynamicDeltaMapping = $this->state->get(static::DYNAMIC_GENERATOR_ID . '_' . $this->sitemapVariant, FALSE);
+    }
+    return array_search($param, $this->dynamicDeltaMapping) + static::FIRST_CHUNK_DELTA;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDynamicChunks($results, $variant, $max_links = NULL) {
     // Create dynamic chunks.
     $dynamic_chunks = [];
     foreach ($results as $link) {
       // Url generator must also include dynamic parameter to create chunks
       // from it.
-      $dynamic_chunks[$link['meta'][$dynamic_parameter_name]][] = $link;
+      $dynamic_chunks[$link['meta'][static::DYNAMIC_GENERATOR_PARAMETER_NAME]][] = $link;
     }
     $dynamic_chunks_max_links = [];
     if (!empty($max_links)) {
@@ -180,15 +191,8 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
         $dynamic_chunks_max_links[$dynamic_parameter . '-1'] = $dynamic_chunk;
       }
     }
-    $this->state->set(self::DYNAMIC_GENERATOR_ID . '_' . $variant, array_keys($dynamic_chunks_max_links));
+    $this->state->set(static::DYNAMIC_GENERATOR_ID . '_' . $variant, array_keys($dynamic_chunks_max_links));
     return $dynamic_chunks_max_links;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDynamicParameterName() {
-    return self::DYNAMIC_GENERATOR_PARAMETER_NAME;
   }
 
 }

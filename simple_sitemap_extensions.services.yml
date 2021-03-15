@@ -8,3 +8,8 @@ services:
     class: Drupal\simple_sitemap_extensions\PathProcessor\PathProcessorSitemapVariantOut
     tags:
       - { name: path_processor_outbound, priority: 350 }
+
+  simple_sitemap_extensions.route_subscriber:
+    class: '\Drupal\simple_sitemap_extensions\Routing\RouteSubscriber'
+    tags:
+      - { name: event_subscriber }

@@ -17,13 +17,13 @@ class PathProcessorSitemapVariantIn implements InboundPathProcessorInterface {
    */
   public function processInbound($path, Request $request) {
     $args = explode('/', $path);
-    if (count($args) === 4 && is_numeric($args[2]) && $args[3] === 'sitemap.xml') {
+    if (count($args) === 4 && $args[3] === 'sitemap.xml') {
       $page = $args[2];
       $path = '/' . $args[1] . '/sitemap.xml';
       $request->query->set('page', $page);
     }
 
-    if (count($args) === 5 && 'sitemaps' === $args[1] && is_numeric($args[3]) && $args[4] === 'sitemap.xml') {
+    if (count($args) === 5 && 'sitemaps' === $args[1] && $args[4] === 'sitemap.xml') {
       $page = $args[3];
       $path = '/' . $args[2] . '/sitemap.xml';
       $request->query->set('page', $page);

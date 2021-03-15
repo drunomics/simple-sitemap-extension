@@ -39,7 +39,7 @@ class DynamicSitemapQueueWorker extends QueueWorker {
         return;
       }
 
-      $dynamic_chunks = $generator->getDynamicChunks($this->processedResults, $this->variantProcessedNow, $generator->getDynamicParameterName(), $this->maxLinks);
+      $dynamic_chunks = $generator->getDynamicChunks($this->processedResults, $this->variantProcessedNow, $this->maxLinks);
       foreach ($dynamic_chunks as $dynamic_chunk) {
         if ($complete) {
           $generator->generate($dynamic_chunk);

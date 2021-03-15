@@ -52,7 +52,6 @@ class SitemapIndexGenerator extends SitemapGeneratorBase {
 
     $sitemap_variant = $this->sitemapVariant;
     $this->moduleHandler->alter('simple_sitemap_links', $links, $sitemap_variant);
-
     foreach ($links as $link) {
       $this->writer->startElement('sitemap');
       $this->writer->writeElement('loc', $link['url']->toString());

@@ -14,21 +14,35 @@ interface DynamicSitemapGeneratorInterface {
    *   Array of links to process.
    * @param string $variant
    *   Currently processed variant.
-   * @param string $dynamic_parameter_name
-   *   Comes from url generator generateData method.
    * @param int|null $max_links
    *   Maximum number of links per chunk.
    *
    * @return array
    *   Array of chunk arrays.
    */
-  public function getDynamicChunks(array $results, string $variant, string $dynamic_parameter_name, $max_links = NULL);
+  public function getDynamicChunks(array $results, string $variant, $max_links = NULL);
 
   /**
-   * Get dynamic parameter name used in url generator plugin.
+   * Get current query parameter from the mapping.
    *
-   * @return string
+   * @param int $delta
+   *   Current chunk.
+   *
+   * @return false|string
+   *   Url query parameter or False.
    */
-  public function getDynamicParameterName();
+  public function getCurrentChunkParameterFromMapping(int $delta);
+
+
+  /**
+   * Get delta from dynamic parameter from the mapping.
+   *
+   * @param string $param
+   *   Current chunk.
+   *
+   * @return false|string
+   *   Url query parameter or False.
+   */
+  public function getCurrentDeltaFromMapping(string $param);
 
 }
