@@ -54,7 +54,7 @@ class SitemapIndexGenerator extends SitemapGeneratorBase {
     $this->moduleHandler->alter('simple_sitemap_links', $links, $sitemap_variant);
     foreach ($links as $link) {
       $this->writer->startElement('sitemap');
-      $this->writer->writeElement('loc', $link['url']->toString());
+      $this->writer->writeElement('loc', is_string($link['url']) ? $link['url'] : $link['url']->toString());
 
       // Add lastmod if any.
       if (isset($link['lastmod'])) {

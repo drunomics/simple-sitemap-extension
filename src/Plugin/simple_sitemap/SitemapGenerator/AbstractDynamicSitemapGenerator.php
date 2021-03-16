@@ -173,10 +173,10 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
   public function getDynamicChunks($results, $variant, $max_links = NULL) {
     // Create dynamic chunks.
     $dynamic_chunks = [];
-    foreach ($results as $link) {
+    foreach ($results as $key => $link) {
       // Url generator must also include dynamic parameter to create chunks
       // from it.
-      $dynamic_chunks[$link['meta'][static::DYNAMIC_GENERATOR_PARAMETER_NAME]][] = $link;
+      $dynamic_chunks[$link['meta'][static::DYNAMIC_GENERATOR_PARAMETER_NAME]][$key] = $link;
     }
     $dynamic_chunks_max_links = [];
     if (!empty($max_links)) {
