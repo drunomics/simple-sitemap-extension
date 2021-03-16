@@ -5,6 +5,7 @@ namespace Drupal\simple_sitemap_extensions\Controller;
 use Drupal\Core\State\StateInterface;
 use Drupal\simple_sitemap\Controller\SimplesitemapController;
 use Drupal\simple_sitemap\Simplesitemap;
+use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\DynamicSitemapGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,17 +53,19 @@ class DynamicSimplesitemapController extends SimplesitemapController {
     // Convert month parameter into delta.
     if (isset($variant)) {
       $sitemap_generator = $this->getGeneratorFromVariant($variant);
-      $parameter = $request->query->get('page');
-      $delta = $sitemap_generator->getCurrentDeltaFromMapping($parameter);
-      $output = $this->generator->setVariants($variant)->getSitemap($delta);
-      if (!$output) {
-        throw new NotFoundHttpException();
-      }
+      if ($sitemap_generator instanceof DynamicSitemapGeneratorInterface) {
+        $parameter = $request->query->get('page');
+        $delta = $sitemap_generator->getCurrentDeltaFromMapping($parameter);
+        $output = $this->generator->setVariants($variant)->getSitemap($delta);
+        if (!$output) {
+          throw new NotFoundHttpException();
+        }
 
-      return new Response($output, Response::HTTP_OK, [
-        'Content-type' => 'application/xml; charset=utf-8',
-        'X-Robots-Tag' => 'noindex, follow',
-      ]);
+        return new Response($output, Response::HTTP_OK, [
+          'Content-type' => 'application/xml; charset=utf-8',
+          'X-Robots-Tag' => 'noindex, follow',
+        ]);
+      }
     }
     return parent::getSitemap($request, $variant);
   }

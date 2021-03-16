@@ -224,10 +224,9 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
       // generated before index otherwise mapping might be off!
       $generator = $this->getGeneratorFromVariant($data_set['variant']);
       if ($generator instanceof DynamicSitemapGeneratorInterface) {
-        // I have to get the mapping and switch page with dynamic parameter.
+        // Get the mapping and switch page with dynamic parameter.
         // And in controller we have to do the other way around.
-        // @TODO counter should resemble FIRST_CHUNK_DELTA settings.
-        for ($i = 1; $i <= $pages; $i++) {
+        for ($i = $generator::FIRST_CHUNK_DELTA; $i <= $pages; $i++) {
           $url = Url::fromRoute('simple_sitemap_extensions.sitemap_variant_page', [
             'variant' => $data_set['variant'],
             'page' => $generator->getCurrentChunkParameterFromMapping($i),
