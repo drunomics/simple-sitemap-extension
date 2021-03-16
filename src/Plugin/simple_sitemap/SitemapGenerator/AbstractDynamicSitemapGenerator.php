@@ -157,7 +157,10 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
   /**
    * {@inheritdoc}
    */
-  public function getCurrentDeltaFromMapping(string $param) {
+  public function getCurrentDeltaFromMapping($param = NULL) {
+    if (!$param) {
+      return 0;
+    }
     if (empty($this->dynamicDeltaMapping)) {
       $this->dynamicDeltaMapping = $this->state->get(static::DYNAMIC_GENERATOR_ID . '_' . $this->sitemapVariant, FALSE);
     }

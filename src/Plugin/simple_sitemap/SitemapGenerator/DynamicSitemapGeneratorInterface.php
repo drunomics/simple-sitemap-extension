@@ -37,12 +37,12 @@ interface DynamicSitemapGeneratorInterface {
   /**
    * Get delta from dynamic parameter from the mapping.
    *
-   * @param string $param
+   * @param string|null $param
    *   Current chunk.
    *
    * @return false|string
    *   Url query parameter or False.
    */
-  public function getCurrentDeltaFromMapping(string $param);
+  public function getCurrentDeltaFromMapping($param = NULL);
 
 }

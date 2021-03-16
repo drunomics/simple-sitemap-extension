@@ -12,7 +12,7 @@ use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\Abst
  * @SitemapGenerator(
  *   id = "monthly_dynamic_generator",
  *   label = @Translation("Monthly dynamic sitemap generator"),
- *   description = @Translation("Generates sitemap links to articles per monhtl sitemaps."),
+ *   description = @Translation("Generates monhtly sitemaps."),
  * )
  */
 class MonthlySitemapGenerator extends AbstractDynamicSitemapGenerator {
