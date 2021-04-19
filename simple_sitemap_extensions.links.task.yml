@@ -1,5 +1,5 @@
 simple_sitemap_extensions.settings_sitemap_index:
   route_name: simple_sitemap_extensions.settings_sitemap_index
   title: 'Sitemap index'
-  base_route: simple_sitemap.settings
+  parent_id: simple_sitemap.sitemaps
   weight: 4

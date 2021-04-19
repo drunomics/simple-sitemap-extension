@@ -1,0 +1,8 @@
+type: module
+name: Dynamic Monthly Simple Sitemap
+description: 'Adds monthly type to simple XML sitemap.'
+package: SEO
+core: 8.x
+dependencies:
+  - drunomics:simple_sitemap_extensions
+  - simple_sitemap:simple_sitemap

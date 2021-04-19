@@ -10,7 +10,7 @@ use Drupal\simple_sitemap\Logger;
 use Drupal\simple_sitemap\Plugin\simple_sitemap\UrlGenerator\UrlGeneratorBase;
 use Drupal\simple_sitemap\Simplesitemap;
 use Drupal\Core\Language\LanguageManagerInterface;
-use Drupal\simple_sitemap\SimplesitemapManager;
+use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\DynamicSitemapGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Datetime\TimeInterface;
 
@@ -75,8 +75,6 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
    *   Logger.
    * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
    *   Language manager.
-   * @param \Drupal\simple_sitemap\SimplesitemapManager $sitemap_manager
-   *   Sitemap manager.
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   Time service.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -91,7 +89,6 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
     Simplesitemap $generator,
     Logger $logger,
     LanguageManagerInterface $language_manager,
-    SimplesitemapManager $sitemap_manager,
     TimeInterface $time,
     ConfigFactoryInterface $config_factory,
     Connection $database
@@ -105,7 +102,7 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
     );
 
     $this->languageManager = $language_manager;
-    $this->sitemapManager = $sitemap_manager;
+    $this->sitemapManager = $this->generator->getSitemapManager();
     $this->time = $time;
     $this->configFactory = $config_factory;
     $this->database = $database;
@@ -138,7 +135,6 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
       $container->get('simple_sitemap.generator'),
       $container->get('simple_sitemap.logger'),
       $container->get('language_manager'),
-      $container->get('simple_sitemap.manager'),
       $container->get('datetime.time'),
       $container->get('config.factory'),
       $container->get('database')
@@ -223,20 +219,44 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
       if ($pages > 1) {
         $pages -= 1;
       }
-      for ($i = 1; $i <= $pages; $i++) {
-        $url = Url::fromRoute('simple_sitemap_extensions.sitemap_variant_page', [
-          'variant' => $data_set['variant'],
-          'page' => $i,
-        ], $settings);
+      // If we are on dynamic sitemap convert urls accordingly.
+      // @TODO Watch out for racing conditions! Other sitemaps must be
+      // generated before index otherwise mapping might be off!
+      $generator = $this->getGeneratorFromVariant($data_set['variant']);
+      if ($generator instanceof DynamicSitemapGeneratorInterface) {
+        // Get the mapping and switch page with dynamic parameter.
+        // And in controller we have to do the other way around.
+        for ($i = $generator::FIRST_CHUNK_DELTA; $i <= $pages; $i++) {
+          $url = Url::fromRoute('simple_sitemap_extensions.sitemap_variant_page', [
+            'variant' => $data_set['variant'],
+            'page' => $generator->getCurrentChunkParameterFromMapping($i),
+          ], $settings);
 
-        $url = [
-          'url' => $url,
-          'lastmod' => date('c', $this->time->getRequestTime()),
-        ];
-        $urls[] = $url;
+          $url = [
+            'url' => $url,
+            'lastmod' => date('c', $this->time->getRequestTime()),
+          ];
+          $urls[] = $url;
+        }
+
+        return $urls;
       }
+      else {
+        for ($i = 1; $i <= $pages; $i++) {
+          $url = Url::fromRoute('simple_sitemap_extensions.sitemap_variant_page', [
+            'variant' => $data_set['variant'],
+            'page' => $i,
+          ], $settings);
 
-      return $urls;
+          $url = [
+            'url' => $url,
+            'lastmod' => date('c', $this->time->getRequestTime()),
+          ];
+          $urls[] = $url;
+        }
+
+        return $urls;
+      }
     }
     else {
       $url = Url::fromRoute('simple_sitemap.sitemap_variant', ['variant' => $data_set['variant']], $settings);
@@ -248,6 +268,27 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
       ];
     }
 
+  }
+
+  /**
+   * Helper method to get sitemap generator for variant.
+   *
+   * @param string $variant
+   *   Current sitemap variant.
+   *
+   * @return \Drupal\simple_sitemap\Plugin\simple_sitemap\SitemapGenerator\SitemapGeneratorBase
+   *   Sitemap generator plugin with variant configured.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   */
+  protected function getGeneratorFromVariant(string $variant) {
+    $sitemap_variants = $this->sitemapManager->getSitemapVariants();
+    $sitemap_types = $this->sitemapManager->getSitemapTypes();
+    $type = $sitemap_variants[$variant]['type'];
+    $sitemap_generator_name = $sitemap_types[$type]['sitemapGenerator'];
+    $generator = $this->sitemapManager->getSitemapGenerator($sitemap_generator_name);
+    $generator->setSitemapVariant($variant);
+    return $generator;
   }
 
 }

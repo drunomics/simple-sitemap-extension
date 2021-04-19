@@ -14,7 +14,7 @@ simple_sitemap_extensions.settings_sitemap_index:
 simple_sitemap_extensions.sitemap_variant_page:
   path: '/sitemaps/{variant}/{page}/sitemap.xml'
   defaults:
-    _controller: '\Drupal\simple_sitemap\Controller\SimplesitemapController::getSitemap'
+    _controller: '\Drupal\simple_sitemap_extensions\Controller\DynamicSimplesitemapController::getSitemap'
     _disable_route_normalizer: 'TRUE'
   requirements:
     _access: 'TRUE'
