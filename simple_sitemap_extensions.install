@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Install & update hooks.
+ */
+
+use \Drupal\simple_sitemap\SimplesitemapManager;
+
+/**
+ * Update sitemap index config format, run config export ofter this update.
+ */
+function simple_sitemap_extensions_update_8001() {
+  $config = \Drupal::configFactory()->getEditable('simple_sitemap_extensions.sitemap_index.settings');
+  $variants = (array) $config->get('variants');
+
+  $sitemap_manager = NULL;
+  if (\Drupal::service('module_handler')->moduleExists('simple_sitemap')) {
+    /** @var \Drupal\simple_sitemap\SimplesitemapManager $sitemap_manager */
+    $sitemap_manager = \Drupal::service('simple_sitemap.manager');
+  }
+
+  if (
+    !empty($variants)
+    && $sitemap_manager instanceof SimplesitemapManager
+    && $sitemap_index = $sitemap_manager->getSitemapVariants('sitemap_index')
+  ) {
+    $index_key = key(array_slice($sitemap_index, 0, 1));
+    $index_config = [
+      'variants' => $variants,
+    ];
+    $config->set($index_key, $index_config);
+    $config->clear('variants');
+    $config->save(TRUE);
+  }
+}
