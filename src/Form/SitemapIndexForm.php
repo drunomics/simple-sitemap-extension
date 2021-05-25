@@ -7,12 +7,15 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\simple_sitemap\Form\FormHelper;
 use Drupal\simple_sitemap\Simplesitemap;
 use Drupal\simple_sitemap\SimplesitemapManager;
+use Drupal\simple_sitemap_extensions\SitemapIndexTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form for Sitemap index settings.
  */
 class SitemapIndexForm extends ConfigFormBase {
+
+  use SitemapIndexTrait;
 
   /**
    * Sitemap generator.
@@ -94,40 +97,32 @@ class SitemapIndexForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['sitemap_index'] = [
-      '#title' => $this->t('Sitemap index'),
-      '#type' => 'fieldset',
-      '#markup' => '<div class="description">' . $this->t('Enable or disable sitemap variants on the index.') . '</div>',
-    ];
-
-    $variants = $this->manager->getSitemapVariants();
-    $variants = array_filter($variants, function ($variant) {
-      return $variant['type'] != 'sitemap_index';
-    });
+    $variants = $this->getNonIndexVariants($this->manager);
+    $sitemapindexes = $this->getIndexVariants($this->manager);
 
     $config = $this->getEditableConfig();
-    $enabled_variants = (array) $config->get('variants');
+    foreach ($sitemapindexes as $index_key => $sitemapindex) {
+      $index_config = (array) $config->get($index_key);
+      $enabled_variants = $index_config['variants'] ?? [];
 
-    foreach ($variants as $variant_key => $variant) {
-      $form['sitemap_index']['variant_' . $variant_key] = [
-        '#type' => 'checkbox',
-        '#title' => $variant['label'],
-        '#default_value' => in_array($variant_key, $enabled_variants),
+      $form[$index_key] = [
+        '#type' => 'details',
+        '#title' => $sitemapindex['label'],
+        '#markup' => '<div class="description">' . $this->t('Enable variants on the index.') . '</div>',
+        '#open' => TRUE,
       ];
+
+      foreach ($variants as $variant_key => $variant) {
+        $form[$index_key][$index_key . '_INDEXVARIANT_' . $variant_key] = [
+          '#type' => 'checkbox',
+          '#title' => $variant['label'],
+          '#default_value' => in_array($variant_key, $enabled_variants),
+        ];
+      }
     }
 
     $this->formHelper->displayRegenerateNow($form);
     return parent::buildForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    $enabled_variants = $this->getEnabledVariants($form_state);
-    if (empty($enabled_variants)) {
-      $form_state->setErrorByName('', $this->t("Enable at least one variant for the sitemap index."));
-    }
   }
 
   /**
@@ -138,7 +133,12 @@ class SitemapIndexForm extends ConfigFormBase {
 
     $enabled_variants = $this->getEnabledVariants($form_state);
     $config = $this->getEditableConfig();
-    $config->set('variants', $enabled_variants);
+    foreach ($enabled_variants as $sitemap_index => $variants) {
+      $index_config = (array) $config->get($sitemap_index);
+      $index_config['variants'] = $variants;
+      $config->set($sitemap_index, $index_config);
+    }
+
     $config->save();
 
     // Regenerate sitemaps according to user setting.
@@ -156,13 +156,20 @@ class SitemapIndexForm extends ConfigFormBase {
    *   Formstate.
    *
    * @return string[]
-   *   The enabled variants.
+   *   The enabled variants (values) per sitemap index (key).
    */
   protected function getEnabledVariants(FormStateInterface $form_state) {
     $enabled_variants = [];
     foreach ($form_state->getValues() as $key => $value) {
-      if (preg_match('/^variant_(.*)$/', $key, $m) && $value) {
-        $enabled_variants[] = $m[1];
+      if (preg_match('/^(.*)_INDEXVARIANT_(.*)$/', $key, $m)) {
+        $sitemap_index = $m[1];
+        $variant = $m[2];
+        if (empty($enabled_variants[$sitemap_index])) {
+          $enabled_variants[$sitemap_index] = [];
+        }
+        if ($value) {
+          $enabled_variants[$sitemap_index][] = $variant;
+        }
       }
     }
     return $enabled_variants;

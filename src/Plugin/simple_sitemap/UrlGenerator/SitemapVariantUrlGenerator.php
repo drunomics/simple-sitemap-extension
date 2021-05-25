@@ -11,6 +11,7 @@ use Drupal\simple_sitemap\Plugin\simple_sitemap\UrlGenerator\UrlGeneratorBase;
 use Drupal\simple_sitemap\Simplesitemap;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\DynamicSitemapGeneratorInterface;
+use Drupal\simple_sitemap_extensions\SitemapIndexTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Datetime\TimeInterface;
 
@@ -24,6 +25,8 @@ use Drupal\Component\Datetime\TimeInterface;
  * )
  */
 class SitemapVariantUrlGenerator extends UrlGeneratorBase {
+
+  use SitemapIndexTrait;
 
   /**
    * The config factory.
@@ -146,13 +149,13 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
    */
   public function getDataSets() {
     $data_sets = [];
-    $sitemap_variants = $this->sitemapManager->getSitemapVariants();
-    unset($sitemap_variants['sitemap_index']);
+    $variants = $this->getNonIndexVariants($this->sitemapManager);
 
     $config = $this->configFactory->get('simple_sitemap_extensions.sitemap_index.settings');
-    $enabled_variants = $config->get('variants');
+    $index_config = (array) $config->get($this->sitemapVariant);
+    $enabled_variants = $index_config['variants'] ?? [];
 
-    foreach ($sitemap_variants as $variant_key => $variant_definition) {
+    foreach ($variants as $variant_key => $variant_definition) {
       if (!in_array($variant_key, $enabled_variants)) {
         continue;
       }
