@@ -17,8 +17,13 @@ trait SitemapIndexTrait {
    * @return array
    */
   protected function getIndexVariants(SimplesitemapManager $manager) {
-    $variants = $manager->getSitemapVariants('sitemap_index');
-    return $variants;
+    $variants = $manager->getSitemapVariants();
+    $types = $manager->getSitemapTypes();
+    return array_filter($variants, function ($variant) use ($types) {
+      // Don't go by type itself, but rather by generator to allow for custom
+      // sitemap index types.
+      return $types[$variant['type']]['sitemapGenerator'] == 'sitemap_index';
+    });
   }
 
   /**
@@ -30,8 +35,11 @@ trait SitemapIndexTrait {
    */
   protected function getNonIndexVariants(SimplesitemapManager $manager) {
     $variants = $manager->getSitemapVariants();
-    return array_filter($variants, function ($variant) {
-      return $variant['type'] != 'sitemap_index';
+    $types = $manager->getSitemapTypes();
+    return array_filter($variants, function ($variant) use ($types) {
+      // Don't go by type itself, but rather by generator to allow for custom
+      // sitemap index types.
+      return $types[$variant['type']]['sitemapGenerator'] != 'sitemap_index';
     });
   }
 
