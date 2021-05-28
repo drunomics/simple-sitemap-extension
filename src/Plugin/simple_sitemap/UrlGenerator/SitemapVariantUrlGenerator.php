@@ -200,7 +200,6 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
    */
   public function generate($data_set) {
     $path_data = $this->processDataSet($data_set);
-
     return FALSE !== $path_data ? $path_data : [];
   }
 
@@ -211,7 +210,7 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
     $settings = [
       'absolute' => TRUE,
       'base_url' => $this->getCustomBaseUrl(),
-      'language' => $this->languageManager->getLanguage(LanguageInterface::LANGCODE_NOT_APPLICABLE),
+      'language' => $this->languageManager->getDefaultLanguage(),
     ];
 
     $pages = $this->getNumberOfVariantPages($data_set['variant']);
@@ -238,6 +237,7 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
           $url = [
             'url' => $url,
             'lastmod' => date('c', $this->time->getRequestTime()),
+            'langcode' => $this->languageManager->getDefaultLanguage()->getId(),
           ];
           $urls[] = $url;
         }
@@ -254,6 +254,7 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
           $url = [
             'url' => $url,
             'lastmod' => date('c', $this->time->getRequestTime()),
+            'langcode' => $this->languageManager->getDefaultLanguage()->getId(),
           ];
           $urls[] = $url;
         }
@@ -267,6 +268,7 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
         [
           'url' => $url,
           'lastmod' => date('c', $this->time->getRequestTime()),
+          'langcode' => $this->languageManager->getDefaultLanguage()->getId(),
         ],
       ];
     }
