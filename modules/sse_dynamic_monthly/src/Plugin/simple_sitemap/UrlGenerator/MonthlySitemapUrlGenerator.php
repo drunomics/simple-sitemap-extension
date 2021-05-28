@@ -2,9 +2,11 @@
 
 namespace Drupal\sse_dynamic_monthly\Plugin\simple_sitemap\UrlGenerator;
 
+use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\simple_sitemap\EntityHelper;
 use Drupal\simple_sitemap\Logger;
@@ -35,28 +37,14 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
   protected $dateFormatter;
 
   /**
-   * MonthlySitemapUrlGenerator constructor.
+   * Module handler.
    *
-   * @param array $configuration
-   *   Configuration.
-   * @param string $plugin_id
-   *   Plugin id.
-   * @param mixed $plugin_definition
-   *   Plugin definition.
-   * @param \Drupal\simple_sitemap\Simplesitemap $generator
-   *   Simple Sitemap generator service.
-   * @param \Drupal\simple_sitemap\Logger $logger
-   *   Logger service.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
-   *   Language manager service.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   Entity type manager service.
-   * @param \Drupal\simple_sitemap\EntityHelper $entityHelper
-   *   Entity helper service.
-   * @param \Drupal\simple_sitemap\Plugin\simple_sitemap\UrlGenerator\UrlGeneratorManager $url_generator_manager
-   *   Simple sitemap url generator manager service.
-   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
-   *   Drupal datetime formatter service.
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * {@inheritDoc}
    */
   public function __construct(
     array $configuration,
@@ -68,6 +56,8 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
     EntityTypeManagerInterface $entity_type_manager,
     EntityHelper $entityHelper,
     UrlGeneratorManager $url_generator_manager,
+    MemoryCacheInterface $memory_cache,
+    ModuleHandlerInterface $module_handler,
     DateFormatterInterface $date_formatter
   ) {
     parent::__construct(
@@ -79,8 +69,10 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
       $language_manager,
       $entity_type_manager,
       $entityHelper,
-      $url_generator_manager
+      $url_generator_manager,
+      $memory_cache
     );
+    $this->moduleHandler = $module_handler;
     $this->dateFormatter = $date_formatter;
   }
 
@@ -102,6 +94,8 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
       $container->get('entity_type.manager'),
       $container->get('simple_sitemap.entity_helper'),
       $container->get('plugin.manager.simple_sitemap.url_generator'),
+      $container->get('entity.memory_cache'),
+      $container->get('module_handler'),
       $container->get('date.formatter')
     );
   }
@@ -152,6 +146,9 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
               // specific access. See
               // https://www.drupal.org/project/simple_sitemap/issues/3102450.
               $query->accessCheck(FALSE);
+
+              $this->moduleHandler->invokeAll('simple_sitemap_extensions_alter_dataset_entity_query', [$this, $query]);
+
               // Set month back to correct value.
               $date_now->modify('-1 month');
               foreach ($query->execute() as $entity_id) {
