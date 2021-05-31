@@ -14,6 +14,7 @@ trait SitemapIndexTrait {
    *
    * @param \Drupal\simple_sitemap\SimplesitemapManager $manager
    *   Sitemap manager.
+   *
    * @return array
    */
   protected function getIndexVariants(SimplesitemapManager $manager) {
@@ -31,6 +32,7 @@ trait SitemapIndexTrait {
    *
    * @param \Drupal\simple_sitemap\SimplesitemapManager $manager
    *   Sitemap manager.
+   *
    * @return array
    */
   protected function getNonIndexVariants(SimplesitemapManager $manager) {

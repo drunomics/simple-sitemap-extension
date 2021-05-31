@@ -4,7 +4,6 @@ namespace Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\UrlGenerator;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Database\Connection;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\simple_sitemap\Logger;
 use Drupal\simple_sitemap\Plugin\simple_sitemap\UrlGenerator\UrlGeneratorBase;

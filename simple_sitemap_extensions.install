@@ -5,7 +5,7 @@
  * Install & update hooks.
  */
 
-use \Drupal\simple_sitemap\SimplesitemapManager;
+use Drupal\simple_sitemap\SimplesitemapManager;
 
 /**
  * Update sitemap index config format, run config export ofter this update.

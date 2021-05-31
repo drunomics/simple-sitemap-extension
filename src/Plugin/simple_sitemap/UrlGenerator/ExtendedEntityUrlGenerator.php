@@ -101,7 +101,8 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
     foreach ($this->generator->setVariants($this->sitemapVariant)->getBundleSettings() as $entity_type_name => $bundles) {
       if (isset($sitemap_entity_types[$entity_type_name])) {
 
-        // Skip this entity type if another plugin is written to override its generation.
+        // Skip this entity type if another plugin is written to override its
+        // generation.
         foreach ($this->urlGeneratorManager->getDefinitions() as $plugin) {
           if (isset($plugin['settings']['overrides_entity_type'])
             && $plugin['settings']['overrides_entity_type'] === $entity_type_name) {

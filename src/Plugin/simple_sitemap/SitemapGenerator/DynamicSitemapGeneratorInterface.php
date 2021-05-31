@@ -33,7 +33,6 @@ interface DynamicSitemapGeneratorInterface {
    */
   public function getCurrentChunkParameterFromMapping(int $delta);
 
-
   /**
    * Get delta from dynamic parameter from the mapping.
    *
