@@ -108,7 +108,7 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
     $sitemap_entity_types = $this->entityHelper->getSupportedEntityTypes();
     $bundle_settings = $this->generator->setVariants($this->sitemapVariant)->getBundleSettings();
     // Iterate over months until we come to the oldest entity date.
-    $date_oldest = new DrupalDateTime($this->dateFormatter->format($this->getOldestEntityChangedDate($bundle_settings), 'custom', 'Y-m'));
+    $date_oldest = new DrupalDateTime($this->dateFormatter->format($this->getOldestEntityCreatedDate($bundle_settings), 'custom', 'Y-m'));
     foreach ($bundle_settings as $entity_type_name => $bundles) {
       $date_now = new DrupalDateTime($this->dateFormatter->format(time(), 'custom', 'Y-m'));
       while ($date_now >= $date_oldest) {
@@ -140,8 +140,8 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
                 $query->condition($keys['status'], 1);
               }
               $query
-                ->condition('changed', strtotime($date_now), '>')
-                ->condition('changed', strtotime($date_now->modify('+1 month')), '<');
+                ->condition('created', strtotime($date_now), '>')
+                ->condition('created', strtotime($date_now->modify('+1 month')), '<=');
               // Shift access check to EntityUrlGeneratorBase for language
               // specific access. See
               // https://www.drupal.org/project/simple_sitemap/issues/3102450.
@@ -176,7 +176,7 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getOldestEntityChangedDate($bundle_settings) {
+  protected function getOldestEntityCreatedDate($bundle_settings) {
     $oldest = NULL;
     $sitemap_entity_types = $this->entityHelper->getSupportedEntityTypes();
     foreach ($bundle_settings as $entity_type_name => $bundles) {
@@ -204,15 +204,15 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
               $query->condition($keys['status'], 1);
             }
             $result = $query
-              ->sort('changed', 'ASC')
+              ->sort('created', 'ASC')
               ->range(0, 1)
               ->execute();
             $oldest_entity = $entityTypeStorage->load(reset($result));
             if (empty($oldest)) {
-              $oldest = $oldest_entity->changed->value;
+              $oldest = $oldest_entity->created->value;
             }
             else {
-              $oldest = $oldest_entity->changed->value < $oldest ? $oldest_entity->changed->value : $oldest;
+              $oldest = $oldest_entity->created->value < $oldest ? $oldest_entity->created->value : $oldest;
             }
           }
         }
