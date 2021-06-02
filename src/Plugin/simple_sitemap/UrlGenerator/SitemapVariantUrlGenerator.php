@@ -10,6 +10,7 @@ use Drupal\simple_sitemap\Plugin\simple_sitemap\UrlGenerator\UrlGeneratorBase;
 use Drupal\simple_sitemap\Simplesitemap;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\DynamicSitemapGeneratorInterface;
+use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\AbstractDynamicSitemapGenerator;
 use Drupal\simple_sitemap_extensions\SitemapIndexTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Datetime\TimeInterface;
@@ -180,18 +181,19 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
    * @param string $sitemapVariant
    *   The sitemap variant.
    *
-   * @return int
-   *   The number of pages.
+   * @return array
+   *   Pages for the variant indexed by delta.
    */
   private function getNumberOfVariantPages($sitemapVariant) {
-    $sitemaps = $this->database->select('simple_sitemap', 's')
+    $pages = $this->database->select('simple_sitemap', 's')
       ->fields('s', ['delta', 'sitemap_created', 'type'])
       ->condition('s.type', $sitemapVariant)
       ->condition('s.status', 1)
+      ->orderBy('delta', 'ASC')
       ->execute()
-      ->fetchAll();
+      ->fetchAllAssoc('delta');
 
-    return is_array($sitemaps) && NULL !== $sitemaps ? count($sitemaps) : 1;
+    return (array) $pages;
   }
 
   /**
@@ -213,53 +215,30 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
     ];
 
     $pages = $this->getNumberOfVariantPages($data_set['variant']);
-    if ($pages > 1) {
+    $generator = $this->getGeneratorFromVariant($data_set['variant']);
+
+    if (count($pages) > 1 || $generator instanceof DynamicSitemapGeneratorInterface) {
       $urls = [];
-
-      // The last page is a listing with pagination only.
-      if ($pages > 1) {
-        $pages -= 1;
-      }
-      // If we are on dynamic sitemap convert urls accordingly.
-      // @TODO Watch out for racing conditions! Other sitemaps must be
-      // generated before index otherwise mapping might be off!
-      $generator = $this->getGeneratorFromVariant($data_set['variant']);
-      if ($generator instanceof DynamicSitemapGeneratorInterface) {
-        // Get the mapping and switch page with dynamic parameter.
-        // And in controller we have to do the other way around.
-        for ($i = $generator::FIRST_CHUNK_DELTA; $i <= $pages; $i++) {
-          $url = Url::fromRoute('simple_sitemap_extensions.sitemap_variant_page', [
-            'variant' => $data_set['variant'],
-            'page' => $generator->getCurrentChunkParameterFromMapping($i),
-          ], $settings);
-
-          $url = [
-            'url' => $url->toString(),
-            'lastmod' => date('c', $this->time->getRequestTime()),
-            'langcode' => $this->languageManager->getDefaultLanguage()->getId(),
-          ];
-          $urls[] = $url;
+      foreach ($pages as $delta => $page) {
+        // Skip index.
+        if ($delta == 0) {
+          continue;
         }
 
-        return $urls;
-      }
-      else {
-        for ($i = 1; $i <= $pages; $i++) {
-          $url = Url::fromRoute('simple_sitemap_extensions.sitemap_variant_page', [
-            'variant' => $data_set['variant'],
-            'page' => $i,
-          ], $settings);
+        $url = Url::fromRoute('simple_sitemap_extensions.sitemap_variant_page', [
+          'variant' => $data_set['variant'],
+          'page' => $generator instanceof DynamicSitemapGeneratorInterface ? $generator->getCurrentChunkParameterFromMapping($delta) : $delta,
+        ], $settings);
 
-          $url = [
-            'url' => $url,
-            'lastmod' => date('c', $this->time->getRequestTime()),
-            'langcode' => $this->languageManager->getDefaultLanguage()->getId(),
-          ];
-          $urls[] = $url;
-        }
-
-        return $urls;
+        $url = [
+          'url' => $url,
+          'lastmod' => date('c', $this->time->getRequestTime()),
+          'langcode' => $this->languageManager->getDefaultLanguage()->getId(),
+        ];
+        $urls[] = $url;
       }
+
+      return $urls;
     }
     else {
       $url = Url::fromRoute('simple_sitemap.sitemap_variant', ['variant' => $data_set['variant']], $settings);
@@ -271,7 +250,6 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
         ],
       ];
     }
-
   }
 
   /**
