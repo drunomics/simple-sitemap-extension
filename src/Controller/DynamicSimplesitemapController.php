@@ -50,7 +50,7 @@ class DynamicSimplesitemapController extends SimplesitemapController {
    * {@inheritdoc}
    */
   public function getSitemap(Request $request, $variant = NULL) {
-    // Convert month parameter into delta.
+    // Convert dynamic parameter into delta.
     if (isset($variant)) {
       $sitemap_generator = $this->getGeneratorFromVariant($variant);
       if ($sitemap_generator instanceof DynamicSitemapGeneratorInterface) {

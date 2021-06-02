@@ -234,7 +234,7 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
           ], $settings);
 
           $url = [
-            'url' => $url,
+            'url' => $url->toString(),
             'lastmod' => date('c', $this->time->getRequestTime()),
             'langcode' => $this->languageManager->getDefaultLanguage()->getId(),
           ];
