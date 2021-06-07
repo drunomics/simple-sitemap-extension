@@ -10,7 +10,6 @@ use Drupal\simple_sitemap\Plugin\simple_sitemap\UrlGenerator\UrlGeneratorBase;
 use Drupal\simple_sitemap\Simplesitemap;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\DynamicSitemapGeneratorInterface;
-use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\AbstractDynamicSitemapGenerator;
 use Drupal\simple_sitemap_extensions\SitemapIndexTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Datetime\TimeInterface;
