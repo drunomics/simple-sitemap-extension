@@ -10,7 +10,7 @@ use Drupal\simple_sitemap\Plugin\simple_sitemap\SitemapType\SitemapTypeBase;
  * @SitemapType(
  *   id = "extended_entity",
  *   label = @Translation("Extended entity"),
- *   description = @Translation("The extended entity index type."),
+ *   description = @Translation("Allows adding images within paragraphs and altering the entity query. Provided by the Sitemap Extensions module."),
  *   sitemapGenerator = "default",
  *   urlGenerators = {
  *     "extended_entity"
