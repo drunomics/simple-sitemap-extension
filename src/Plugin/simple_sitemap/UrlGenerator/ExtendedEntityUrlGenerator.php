@@ -22,6 +22,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Extends the basis entity url generator.
  *
+ * Adds support for deriving images from paragraphs contained in an entity and
+ * the simple_sitemap_extensions_alter_dataset_entity_query() hook. Besidse that
+ * it matches the regular URL generator.
+ *
  * @UrlGenerator(
  *   id = "extended_entity",
  *   label = @Translation("Extended entity URL generator"),
