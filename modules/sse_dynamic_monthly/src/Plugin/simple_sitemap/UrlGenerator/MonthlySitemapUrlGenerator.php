@@ -17,9 +17,7 @@ use Drupal\sse_dynamic_monthly\Plugin\simple_sitemap\SitemapGenerator\MonthlySit
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class EntityUrlGenerator.
- *
- * @package Drupal\simple_sitemap\Plugin\simple_sitemap\UrlGenerator
+ * Generates entity URLs on a monthly basis.
  *
  * @UrlGenerator(
  *   id = "monthly_url_generator",

@@ -5,7 +5,7 @@ namespace Drupal\sse_dynamic_monthly\Plugin\simple_sitemap\SitemapType;
 use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapType\DynamicSitemapType;
 
 /**
- * The dynamic sitemap type.
+ * The monthly dynamic sitemap type.
  *
  * @SitemapType(
  *   id = "monthly_dynamic_type",

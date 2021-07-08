@@ -18,6 +18,7 @@ class PathProcessorSitemapVariantOut implements OutboundPathProcessorInterface {
    */
   public function processOutbound($path, &$options = [], Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
     $args = explode('/', $path);
+    // /sitemap/{ variant }/{ chunk }/sitemap.xml ->  /{variant}/sitemap.xml?page=1
     if (count($args) === 4 && is_numeric($args[2]) && $args[3] === 'sitemap.xml') {
       $page = $args[2];
       $path = '/' . $args[1] . '/sitemap.xml';

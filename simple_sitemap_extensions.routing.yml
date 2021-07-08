@@ -12,7 +12,7 @@ simple_sitemap_extensions.settings_sitemap_index:
 # Drupal\simple_sitemap\PathProcessor\PathProcessorSitemapVariant::processInbound()
 # is being used to catch the request and redirect to the following route.
 simple_sitemap_extensions.sitemap_variant_page:
-  path: '/sitemaps/{variant}/{page}/sitemap.xml'
+  path: '/sitemaps/{variant}/{chunk}/sitemap.xml'
   defaults:
     _controller: '\Drupal\simple_sitemap_extensions\Controller\DynamicSimplesitemapController::getSitemap'
     _disable_route_normalizer: 'TRUE'

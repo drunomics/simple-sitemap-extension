@@ -17,6 +17,8 @@ use Drupal\Component\Datetime\TimeInterface;
 /**
  * Generates urls for sitemap variants.
  *
+ * This is the URL generator used for the sitemap index.
+ *
  * @UrlGenerator(
  *   id = "sitemap_variant",
  *   label = @Translation("Sitemap variant URL generator"),
@@ -224,10 +226,18 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
           continue;
         }
 
-        $url = Url::fromRoute('simple_sitemap_extensions.sitemap_variant_page', [
-          'variant' => $data_set['variant'],
-          'page' => $generator instanceof DynamicSitemapGeneratorInterface ? $generator->getCurrentChunkParameterFromMapping($delta) : $delta,
-        ], $settings);
+        if ($generator instanceof DynamicSitemapGeneratorInterface) {
+          $url = $generator->getSitemapUrl($delta, $settings);
+        }
+        else {
+          // @todo: This duplicates $generator->getSitemapUrl() - needs fix
+          // to re-use it while keeping our settings.
+          $parameters = [
+            'page' => $delta,
+            'variant' => $data_set['variant'],
+          ];
+          $url = Url::fromRoute('simple_sitemap.sitemap_variant', $parameters, $settings);
+        }
 
         $url = [
           'url' => $url,

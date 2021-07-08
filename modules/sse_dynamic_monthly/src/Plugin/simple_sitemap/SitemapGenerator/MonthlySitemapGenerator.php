@@ -5,9 +5,7 @@ namespace Drupal\sse_dynamic_monthly\Plugin\simple_sitemap\SitemapGenerator;
 use Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\SitemapGenerator\AbstractDynamicSitemapGenerator;
 
 /**
- * Generator for sitemap index of variants.
- *
- * @package Drupal\monthly_simple_sitemap\Plugin\simple_sitemap\SitemapGenerator
+ * Generator for monthly sitemaps.
  *
  * @SitemapGenerator(
  *   id = "monthly_dynamic_generator",

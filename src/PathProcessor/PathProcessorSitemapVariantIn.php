@@ -17,15 +17,10 @@ class PathProcessorSitemapVariantIn implements InboundPathProcessorInterface {
    */
   public function processInbound($path, Request $request) {
     $args = explode('/', $path);
+    // /{ variant }/{ chunk }/sitemap.xml
     if (count($args) === 4 && $args[3] === 'sitemap.xml') {
       $page = $args[2];
       $path = '/' . $args[1] . '/sitemap.xml';
-      $request->query->set('page', $page);
-    }
-
-    if (count($args) === 5 && 'sitemaps' === $args[1] && $args[4] === 'sitemap.xml') {
-      $page = $args[3];
-      $path = '/' . $args[2] . '/sitemap.xml';
       $request->query->set('page', $page);
     }
 
