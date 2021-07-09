@@ -13,15 +13,9 @@ use Drupal\simple_sitemap\Plugin\simple_sitemap\SitemapGenerator\SitemapWriter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Dynamic generator for sitemap index of variants.
+ * Generates a dynamic sitemap containing links to dynamic sitemap chunks.
  *
- * Dynamic generator should extend this class.
- *
- * @SitemapGenerator(
- *   id = "dynamic_sitemap_index",
- *   label = @Translation("Dynamic sytemap generator"),
- *   description = @Translation("Generates a dynamic sitemap containing links to dynamic sitemap chunks."),
- * )
+ * Dynamic generator need to extend this class.
  */
 abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator implements DynamicSitemapGeneratorInterface {
 
@@ -44,7 +38,7 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
   protected $dynamicDeltaMapping = NULL;
 
   /**
-   * MonthlySitemapGenerator constructor.
+   * Object constructor.
    *
    * @param array $configuration
    *   Configuration of Simple XML Sitemap.
@@ -114,34 +108,29 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
    *
    * @param mixed $delta
    *   Which month to fetch.
+   * @param array|null $settings
+   *   (optional) If set, custom sitemap URL settings to apply.
    *
    * @return string
    *   Url of a sitemap.
    */
-  public function getSitemapUrl($delta = NULL) {
-    // @TODO Check if this method is necessary.
-    if (is_null($delta)) {
-      $parameters = [];
+  public function getSitemapUrl($delta = NULL, array $settings = NULL) {
+    if ($this->isDefaultVariant() || !isset($delta)) {
+      // @TODO selecting dynamic variant as default might cause problems
+      // with the url - needs testing.
+      return parent::getSitemapUrl($delta);
     }
     else {
-      $parameters = ['page' => $delta];
-      $dynamic_parameter = $this->getCurrentChunkParameterFromMapping($delta);
-      $parameters[static::DYNAMIC_GENERATOR_PARAMETER_NAME] = $dynamic_parameter ?? $delta;
+      $chunk = $this->getCurrentChunkParameterFromMapping($delta);
+      return Url::fromRoute(
+        'simple_sitemap_extensions.sitemap_variant_page',
+        [
+          'chunk' => $chunk ?: $delta,
+          'variant' => $this->sitemapVariant,
+        ],
+        $settings ?? $this->getSitemapUrlSettings()
+      )->toString();
     }
-    // @TODO selecting dynamic variant as default might cause additional problems
-    // with the url.
-    $url = $this->isDefaultVariant()
-      ? Url::fromRoute(
-        'simple_sitemap.sitemap_default',
-        $parameters,
-        $this->getSitemapUrlSettings())
-      : Url::fromRoute(
-        'simple_sitemap.sitemap_variant',
-        $parameters + ['variant' => $this->sitemapVariant],
-        $this->getSitemapUrlSettings()
-      );
-
-    return $url->toString();
   }
 
   /**
@@ -157,14 +146,14 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
   /**
    * {@inheritdoc}
    */
-  public function getCurrentDeltaFromMapping($param = NULL) {
-    if (!$param) {
+  public function getCurrentDeltaFromMapping($chunk = NULL) {
+    if (!$chunk) {
       return 0;
     }
     if (empty($this->dynamicDeltaMapping)) {
       $this->dynamicDeltaMapping = $this->state->get(static::DYNAMIC_GENERATOR_ID . '_' . $this->sitemapVariant, FALSE);
     }
-    return array_search($param, $this->dynamicDeltaMapping) + static::FIRST_CHUNK_DELTA;
+    return array_search($chunk, $this->dynamicDeltaMapping) + static::FIRST_CHUNK_DELTA;
   }
 
   /**
@@ -194,6 +183,7 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
         $dynamic_chunks_max_links[$dynamic_parameter . '-1'] = $dynamic_chunk;
       }
     }
+    // Keep a mapping of the page delta counter to dynamic chunks.
     $this->state->set(static::DYNAMIC_GENERATOR_ID . '_' . $variant, array_keys($dynamic_chunks_max_links));
     return $dynamic_chunks_max_links;
   }

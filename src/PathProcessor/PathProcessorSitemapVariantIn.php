@@ -16,19 +16,20 @@ class PathProcessorSitemapVariantIn implements InboundPathProcessorInterface {
    * {@inheritdoc}
    */
   public function processInbound($path, Request $request) {
-    $args = explode('/', $path);
-    if (count($args) === 4 && $args[3] === 'sitemap.xml') {
-      $page = $args[2];
-      $path = '/' . $args[1] . '/sitemap.xml';
-      $request->query->set('page', $page);
+    if (str_ends_with($path, '/sitemap.xml')) {
+      // Remove an index prefix if existing in the form of
+      // { index }/sub/{ variant }/{ chunk }/sitemap.xml
+      $args = explode('/', $path);
+      if ($args[2] == 'sub') {
+        unset($args[1], $args[2]);
+        $path = implode('/', $args);
+      }
+      // Turn /{ variant }/{ chunk }/sitemap.xml back into
+      //      /sitemap/{ variant }/{ chunk }/sitemap.xml
+      if (count($args) === 4) {
+        $path = '/sitemaps' . $path;
+      }
     }
-
-    if (count($args) === 5 && 'sitemaps' === $args[1] && $args[4] === 'sitemap.xml') {
-      $page = $args[3];
-      $path = '/' . $args[2] . '/sitemap.xml';
-      $request->query->set('page', $page);
-    }
-
     return $path;
   }
 

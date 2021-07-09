@@ -49,14 +49,13 @@ class DynamicSimplesitemapController extends SimplesitemapController {
   /**
    * {@inheritdoc}
    */
-  public function getSitemap(Request $request, $variant = NULL) {
+  public function getSitemap(Request $request, $variant = NULL, $chunk = NULL) {
     // Convert dynamic parameter into delta.
     if (isset($variant)) {
       $sitemap_generator = $this->getGeneratorFromVariant($variant);
-      if ($sitemap_generator instanceof DynamicSitemapGeneratorInterface) {
-        $parameter = $request->query->get($sitemap_generator::DYNAMIC_GENERATOR_PARAMETER_NAME);
-        // Parameter was set by PatProcessorSitemapVariantIn.
-        $delta = $parameter ? $sitemap_generator->getCurrentDeltaFromMapping($parameter) : $sitemap_generator->getCurrentDeltaFromMapping($request->query->get('page'));
+      if ($sitemap_generator instanceof DynamicSitemapGeneratorInterface && $chunk) {
+        // Parameter was set by PathProcessorSitemapVariantIn.
+        $delta = $sitemap_generator->getCurrentDeltaFromMapping($chunk) ?: $chunk;
         $output = $this->generator->setVariants($variant)->getSitemap($delta);
         if (!$output) {
           throw new NotFoundHttpException();
