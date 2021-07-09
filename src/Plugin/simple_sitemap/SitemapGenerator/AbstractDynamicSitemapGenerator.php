@@ -108,7 +108,7 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
    *
    * @param mixed $delta
    *   Which month to fetch.
-   * @param array|null
+   * @param array|null $settings
    *   (optional) If set, custom sitemap URL settings to apply.
    *
    * @return string
