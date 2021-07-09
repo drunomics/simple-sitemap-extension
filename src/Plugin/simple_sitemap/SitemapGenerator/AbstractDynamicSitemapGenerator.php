@@ -122,10 +122,12 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
     }
     else {
       $chunk = $this->getCurrentChunkParameterFromMapping($delta);
-      $parameters = ['chunk' => $chunk ?: $delta ];
       return Url::fromRoute(
         'simple_sitemap_extensions.sitemap_variant_page',
-        $parameters + ['variant' => $this->sitemapVariant],
+        [
+          'chunk' => $chunk ?: $delta,
+          'variant' => $this->sitemapVariant,
+        ],
         $settings ?? $this->getSitemapUrlSettings()
       )->toString();
     }

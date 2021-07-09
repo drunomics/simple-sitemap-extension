@@ -213,6 +213,8 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
       'absolute' => TRUE,
       'base_url' => $this->getCustomBaseUrl(),
       'language' => $this->languageManager->getDefaultLanguage(),
+      // Provide additional context for the URL outbound processing.
+      'sitemap_index' => $this->sitemapVariant,
     ];
 
     $pages = $this->getNumberOfVariantPages($data_set['variant']);

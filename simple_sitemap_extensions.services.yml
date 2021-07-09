@@ -2,12 +2,12 @@ services:
   simple_sitemap_extensions.path_processor.variant.in:
     class: Drupal\simple_sitemap_extensions\PathProcessor\PathProcessorSitemapVariantIn
     tags:
-      - { name: path_processor_inbound, priority: 350 }
+      - { name: path_processor_inbound, priority: 400 }
 
   simple_sitemap_extensions.path_processor.variant.out:
     class: Drupal\simple_sitemap_extensions\PathProcessor\PathProcessorSitemapVariantOut
     tags:
-      - { name: path_processor_outbound, priority: 350 }
+      - { name: path_processor_outbound, priority: 200 }
 
   simple_sitemap_extensions.route_subscriber:
     class: '\Drupal\simple_sitemap_extensions\Routing\RouteSubscriber'
