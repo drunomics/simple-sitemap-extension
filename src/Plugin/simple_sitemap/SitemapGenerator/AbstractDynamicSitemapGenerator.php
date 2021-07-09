@@ -115,26 +115,20 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
    *   Url of a sitemap.
    */
   public function getSitemapUrl($delta = NULL, array $settings = NULL) {
-    if (is_null($delta)) {
-      $parameters = [];
+    if ($this->isDefaultVariant() || !isset($delta)) {
+      // @TODO selecting dynamic variant as default might cause problems
+      // with the url - needs testing.
+      return parent::getSitemapUrl($delta);
     }
     else {
-      $parameters = ['chunk' => $this->getCurrentChunkParameterFromMapping($delta) ?? $delta];
-    }
-    // @TODO selecting dynamic variant as default might cause problems
-    // with the url - needs testing.
-    $url = $this->isDefaultVariant() && !isset($delta)
-      ? Url::fromRoute(
-        'simple_sitemap.sitemap_default',
-        $parameters,
-        $settings ?? $this->getSitemapUrlSettings())
-      : Url::fromRoute(
+      $chunk = $this->getCurrentChunkParameterFromMapping($delta);
+      $parameters = ['chunk' => $chunk ?: $delta ];
+      return Url::fromRoute(
         'simple_sitemap_extensions.sitemap_variant_page',
         $parameters + ['variant' => $this->sitemapVariant],
         $settings ?? $this->getSitemapUrlSettings()
-      );
-
-    return $url->toString();
+      )->toString();
+    }
   }
 
   /**
