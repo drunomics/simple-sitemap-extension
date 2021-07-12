@@ -6,9 +6,7 @@ use Drupal\Core\PathProcessor\InboundPathProcessorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class PathProcessorSitemapVariantIn.
- *
- * @package Drupal\simple_sitemap\PathProcessor
+ * Processes incoming paths.
  */
 class PathProcessorSitemapVariantIn implements InboundPathProcessorInterface {
 
@@ -20,7 +18,7 @@ class PathProcessorSitemapVariantIn implements InboundPathProcessorInterface {
       // Remove an index prefix if existing in the form of
       // { index }/sub/{ variant }/{ chunk }/sitemap.xml.
       $args = explode('/', $path);
-      if ($args[2] == 'sub') {
+      if (!empty($args[2]) && $args[2] == 'sub') {
         unset($args[1], $args[2]);
         $path = implode('/', $args);
       }
