@@ -225,7 +225,7 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
   protected function processDataSet($data_set) {
     $processed_data_set = parent::processDataSet($data_set);
     foreach ($processed_data_set as &$item) {
-      $item['meta'][MonthlySitemapGenerator::DYNAMIC_GENERATOR_PARAMETER_NAME] = $data_set['month'];
+      $item['meta'][MonthlySitemapGenerator::DYNAMIC_GENERATOR_PARAMETER_NAME] = $data_set[MonthlySitemapGenerator::DYNAMIC_GENERATOR_PARAMETER_NAME];
     }
     return $processed_data_set;
   }
