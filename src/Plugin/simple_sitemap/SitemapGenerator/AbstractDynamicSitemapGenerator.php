@@ -38,6 +38,13 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
   protected $dynamicDeltaMapping = NULL;
 
   /**
+   * Which sitemap variant current delta mapping applies to.
+   *
+   * @var string
+   */
+  protected $currentVariantMapping = '';
+
+  /**
    * Object constructor.
    *
    * @param array $configuration
@@ -137,8 +144,9 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
    * {@inheritdoc}
    */
   public function getCurrentChunkParameterFromMapping(int $delta) {
-    if (empty($this->dynamicDeltaMapping)) {
+    if (empty($this->dynamicDeltaMapping) || $this->sitemapVariant != $this->currentVariantMapping) {
       $this->dynamicDeltaMapping = $this->state->get(static::DYNAMIC_GENERATOR_ID . '_' . $this->sitemapVariant, FALSE);
+      $this->currentVariantMapping = $this->sitemapVariant;
     }
     return $this->dynamicDeltaMapping[$delta - static::FIRST_CHUNK_DELTA] ?? FALSE;
   }
@@ -150,8 +158,9 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
     if (!$chunk) {
       return 0;
     }
-    if (empty($this->dynamicDeltaMapping)) {
+    if (empty($this->dynamicDeltaMapping) || $this->sitemapVariant != $this->currentVariantMapping) {
       $this->dynamicDeltaMapping = $this->state->get(static::DYNAMIC_GENERATOR_ID . '_' . $this->sitemapVariant, FALSE);
+      $this->currentVariantMapping = $this->sitemapVariant;
     }
     return array_search($chunk, $this->dynamicDeltaMapping) + static::FIRST_CHUNK_DELTA;
   }
