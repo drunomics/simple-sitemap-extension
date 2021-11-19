@@ -145,7 +145,10 @@ class MonthlySitemapUrlGenerator extends EntityUrlGenerator {
               // https://www.drupal.org/project/simple_sitemap/issues/3102450.
               $query->accessCheck(FALSE);
 
-              $this->moduleHandler->invokeAll('simple_sitemap_extensions_alter_dataset_entity_query', [$this, $query]);
+              $this->moduleHandler->invokeAll('simple_sitemap_extensions_alter_dataset_entity_query', [
+                $this,
+                $query,
+              ]);
 
               // Set month back to correct value.
               $date_now->modify('-1 month');
