@@ -136,10 +136,7 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
             // See https://www.drupal.org/project/simple_sitemap/issues/3102450.
             $query->accessCheck(FALSE);
 
-            $this->moduleHandler->invokeAll('simple_sitemap_extensions_alter_dataset_entity_query', [
-              $this,
-              $query,
-            ]);
+            $this->moduleHandler->invokeAll('simple_sitemap_extensions_alter_dataset_entity_query', [$this, $query]);
 
             $data_set = [
               'entity_type' => $entity_type_name,
