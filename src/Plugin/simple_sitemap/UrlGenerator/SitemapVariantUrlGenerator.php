@@ -232,7 +232,7 @@ class SitemapVariantUrlGenerator extends UrlGeneratorBase {
           $url = $generator->getSitemapUrl($delta, $settings);
         }
         else {
-          // @todo: This duplicates $generator->getSitemapUrl() - needs fix
+          // @todo This duplicates $generator->getSitemapUrl() - needs fix
           // to re-use it while keeping our settings.
           $parameters = [
             'page' => $delta,
