@@ -2,6 +2,7 @@
 
 namespace Drupal\simple_sitemap_extensions\Controller;
 
+use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\State\StateInterface;
 use Drupal\simple_sitemap\Controller\SimplesitemapController;
 use Drupal\simple_sitemap\Simplesitemap;
@@ -30,9 +31,11 @@ class DynamicSimplesitemapController extends SimplesitemapController {
    *   Simple sitemap generator service.
    * @param \Drupal\Core\State\StateInterface $state
    *   State service.
+   * @param \Drupal\Core\Config\ConfigFactory $configFactory
+   *   Config factory service.
    */
-  public function __construct(Simplesitemap $generator, StateInterface $state) {
-    parent::__construct($generator);
+  public function __construct(Simplesitemap $generator, StateInterface $state, ConfigFactory $configFactory) {
+    parent::__construct($generator, $configFactory);
     $this->state = $state;
   }
 
@@ -42,7 +45,8 @@ class DynamicSimplesitemapController extends SimplesitemapController {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('simple_sitemap.generator'),
-      $container->get('state')
+      $container->get('state'),
+      $container->get('config.factory'),
     );
   }
 

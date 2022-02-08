@@ -123,8 +123,7 @@ abstract class AbstractDynamicSitemapGenerator extends DefaultSitemapGenerator i
    */
   public function getSitemapUrl($delta = NULL, array $settings = NULL) {
     if ($this->isDefaultVariant() || !isset($delta)) {
-      // @TODO selecting dynamic variant as default might cause problems
-      // with the url - needs testing.
+      // @todo Selecting dynamic variant as default might cause problems with the url - needs testing.
       return parent::getSitemapUrl($delta);
     }
     else {
