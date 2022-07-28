@@ -3,12 +3,14 @@
 namespace Drupal\simple_sitemap_extensions\Plugin\simple_sitemap\UrlGenerator;
 
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
+use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
+use Drupal\Core\File\FileUrlGenerator;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\Plugin\Field\FieldType\FileFieldItemList;
@@ -42,6 +44,21 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
   protected $moduleHandler;
 
   /**
+   * Module handler.
+   *
+   * @var \Drupal\Core\Config\ConfigFactory
+   */
+  protected $configFactory;
+
+
+  /**
+   * File url generator.
+   *
+   * @var \Drupal\Core\File\FileUrlGenerator
+   */
+  protected $fileUrlGenerator;
+
+  /**
    * {@inheritDoc}
    */
   public function __construct(
@@ -55,7 +72,9 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
     EntityHelper $entityHelper,
     UrlGeneratorManager $url_generator_manager,
     MemoryCacheInterface $memory_cache,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
+    ConfigFactory $configFactory,
+    FileUrlGenerator $fileUrlGenerator
   ) {
     parent::__construct(
       $configuration,
@@ -70,6 +89,8 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
       $memory_cache
     );
     $this->moduleHandler = $module_handler;
+    $this->configFactory = $configFactory;
+    $this->fileUrlGenerator = $fileUrlGenerator;
   }
 
   /**
@@ -91,7 +112,9 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
       $container->get('simple_sitemap.entity_helper'),
       $container->get('plugin.manager.simple_sitemap.url_generator'),
       $container->get('entity.memory_cache'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('config.factory'),
+      $container->get('file_url_generator')
     );
   }
 
@@ -168,7 +191,7 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
    * {@inheritDoc}
    */
   protected function getEntityImageData(ContentEntityInterface $entity) {
-    $image_paths = \Drupal::configFactory()->get('simple_sitemap_extensions.extended_entity.image_paths')->get();
+    $image_paths = $this->configFactory->get('simple_sitemap_extensions.extended_entity.image_paths')->get();
     if (empty($image_paths[$entity->getEntityTypeId()][$entity->bundle()])) {
       return parent::getEntityImageData($entity);
     }
@@ -245,12 +268,11 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
     foreach ($field->getValue() as $value) {
       $id = $value['target_id'];
       $image_data[$id] = [
-        'path' => file_create_url(File::load($value['target_id'])->getFileUri()),
+        'path' => $this->fileUrlGenerator->generateAbsoluteString(File::load($value['target_id'])->getFileUri()),
         'alt' => $value['alt'],
         'title' => $value['title'],
       ];
     }
-
     return $image_data;
   }
 
