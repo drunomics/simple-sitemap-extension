@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\Plugin\Field\FieldType\FileFieldItemList;
@@ -42,6 +43,13 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
   protected $moduleHandler;
 
   /**
+   * The file URL generator.
+   *
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
    * {@inheritDoc}
    */
   public function __construct(
@@ -55,7 +63,8 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
     EntityHelper $entityHelper,
     UrlGeneratorManager $url_generator_manager,
     MemoryCacheInterface $memory_cache,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
+    FileUrlGeneratorInterface $file_url_generator
   ) {
     parent::__construct(
       $configuration,
@@ -70,6 +79,7 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
       $memory_cache
     );
     $this->moduleHandler = $module_handler;
+    $this->fileUrlGenerator = $file_url_generator;
   }
 
   /**
@@ -91,7 +101,8 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
       $container->get('simple_sitemap.entity_helper'),
       $container->get('plugin.manager.simple_sitemap.url_generator'),
       $container->get('entity.memory_cache'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('file_url_generator')
     );
   }
 
@@ -242,7 +253,7 @@ class ExtendedEntityUrlGenerator extends EntityUrlGenerator {
     foreach ($field->getValue() as $value) {
       $id = $value['target_id'];
       $image_data[$id] = [
-        'path' => file_create_url(File::load($value['target_id'])->getFileUri()),
+        'path' => $this->fileUrlGenerator->generateAbsoluteString(File::load($value['target_id'])->getFileUri()),
         'alt' => $value['alt'],
         'title' => $value['title'],
       ];
